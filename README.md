@@ -2,10 +2,10 @@
 
 A microservices-based blogging platform: a Node.js/Express backend (4 services behind one gateway) and a React SPA frontend, independently built, deployed, and versioned. This repo is an **umbrella/index** — each half lives in, and is maintained from, its own dedicated repository (added here as git submodules), so either can ship on its own schedule without touching the other.
 
-| | Repo | Deployed to |
-|---|---|---|
-| Backend | [blogify-microservices-backend](https://github.com/anupamsingh-engineer/blogify-microservices-backend) → [`backend/`](backend) | AWS EC2 (Docker Compose + nginx) |
-| Frontend | [blogify-microservices-frontend](https://github.com/anupamsingh-engineer/blogify-microservices-frontend) → [`frontend/`](frontend) | AWS S3 + CloudFront |
+|          | Repo                                                                                                                                | Deployed to                      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Backend  | [blogify-microservices-backend](https://github.com/anupamsingh-engineer/blogify-microservices-backend) → [`backend/`](backend)     | AWS EC2 (Docker Compose + nginx) |
+| Frontend | [blogify-microservices-frontend](https://github.com/anupamsingh-engineer/blogify-microservices-frontend) → [`frontend/`](frontend) | AWS S3 + CloudFront              |
 
 ## Architecture
 
@@ -26,7 +26,6 @@ flowchart LR
 - **blog_service** (PostgreSQL) — blogs, comments, saved blogs, real-time notifications (Socket.io)
 - **ai_service** (stateless) — Gemini-powered summaries + async comment moderation
 - Each service owns its data exclusively — no shared tables, no joins across services; cross-service calls are JWT + one circuit-breaker-wrapped HTTP call + RabbitMQ events
-- Full observability sidecar: Prometheus, Grafana, Loki, Tempo, OpenTelemetry
 
 **→ [Backend README](https://github.com/anupamsingh-engineer/blogify-microservices-backend/blob/main/README.md)**
 
@@ -47,6 +46,14 @@ flowchart LR
 - **Redis-backed token blacklist** for logout/revocation, checked at the gateway (fails open if Redis is down — availability over hard-locking auth)
 - **Defense in depth** — the gateway strips spoofable headers and checks the blacklist, but every downstream service independently re-verifies the JWT signature; nothing trusts the gateway blindly
 
+## Observability (backend)
+
+- **Full RED-method metrics** — every service (gateway, user, blog, ai) exposes Prometheus metrics: rate, errors, duration
+- **Distributed tracing** — OpenTelemetry traces exported to Tempo across all four services
+- **Centralized structured logs** — JSON logs shipped via Grafana Alloy into Loki
+- **One correlation ID, four services** — `X-Request-Id` is minted at the gateway (or reused if present) and threaded through every proxied call, so one request is filterable end-to-end in Loki/Tempo by a single value
+- **Grafana** ties metrics + logs + traces together for one pane of glass
+
 ## Docker & CI/CD
 
 - **Docker** — multi-stage builds, non-root users, healthchecks; one root `docker-compose.yml` runs the full backend stack, each service also has its own standalone compose file for isolated dev
@@ -57,15 +64,3 @@ flowchart LR
 
 - **Backend → EC2**: single instance running the whole Docker Compose stack, nginx on the host for TLS termination (Let's Encrypt)
 - **Frontend → S3 + CloudFront**: private S3 bucket (all public access blocked), CloudFront is the only reader via Origin Access Control, ACM cert for custom HTTPS domain
-
-## Using this repo
-
-Backend and frontend are wired in as **git submodules** — cloning this repo does not duplicate their history, and each can still be cloned, developed, and deployed entirely on its own.
-
-```bash
-git clone --recurse-submodules <this-repo-url>
-# or, if already cloned:
-git submodule update --init --recursive
-```
-
-Pushing changes still happens inside `backend/` or `frontend/` against their own `origin` — this repo only tracks *which commit* of each is currently referenced.
