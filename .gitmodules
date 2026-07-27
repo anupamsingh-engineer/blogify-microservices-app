@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:anupamsingh-engineer/blogify-microservices-backend.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/anupamsingh-engineer/blogify-microservices-frontend.git
