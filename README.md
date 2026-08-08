@@ -1,5 +1,7 @@
 # Blogify — Multi-Author Blog Platform
 
+🎥 [Demo Video](https://drive.google.com/file/d/1PwmXRT2v2z9mnZ46Cwt4PJQ9LLvCVpNm/view?usp=sharing)
+
 A microservices-based blogging platform: a Node.js/Express backend (4 services behind one gateway) and a React SPA frontend, independently built, deployed, and versioned. This repo is an **umbrella/index** — each half lives in, and is maintained from, its own dedicated repository (added here as git submodules), so either can ship on its own schedule without touching the other.
 
 |          | Repo                                                                                                                                | Deployed to                      |
