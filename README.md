@@ -3,6 +3,7 @@
 <a href="https://drive.google.com/file/d/1NN2UMVwcI6mdU0oE1oAT_q8a_lekt8Lg/view?usp=sharing">
   <img src="https://drive.google.com/thumbnail?id=1NN2UMVwcI6mdU0oE1oAT_q8a_lekt8Lg&sz=w1000" alt="▶ Watch Demo Video" width="100%">
 </a>
+Note: click to play video
 
 A microservices-based blogging platform: a Node.js/Express backend (4 services behind one gateway) and a React SPA frontend, independently built, deployed, and versioned. This repo is an **umbrella/index** — each half lives in, and is maintained from, its own dedicated repository (added here as git submodules), so either can ship on its own schedule without touching the other.
 
